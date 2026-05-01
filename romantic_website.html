@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>For You 🤍</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100vh;
+    background: #1a0a0f;
+    font-family: 'Lato', sans-serif;
+    overflow-x: hidden;
+    cursor: default;
+  }
+  #canvas {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .hero {
+    position: relative; z-index: 2;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 2rem;
+  }
+  .tagline {
+    font-family: 'Lato', sans-serif;
+    font-weight: 300;
+    font-size: 13px;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: #e8a0b0;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.3s forwards;
+  }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 7vw, 5rem);
+    color: #fff;
+    line-height: 1.15;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.6s forwards;
+  }
+  h1 em {
+    font-style: italic;
+    color: #f4a0b5;
+  }
+  .subtitle {
+    font-size: 16px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.6);
+    max-width: 420px;
+    line-height: 1.8;
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.9s forwards;
+  }
+  .cta {
+    background: none;
+    border: 1px solid rgba(244,160,181,0.5);
+    color: #f4a0b5;
+    padding: 14px 40px;
+    font-family: 'Lato', sans-serif;
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 0;
+    animation: fadeUp 1s ease 1.2s forwards;
+  }
+  .cta:hover {
+    background: rgba(244,160,181,0.1);
+    border-color: #f4a0b5;
+    color: #fff;
+  }
+  .scroll-hint {
+    position: absolute; bottom: 2rem;
+    left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column;
+    align-items: center; gap: 6px;
+    opacity: 0;
+    animation: fadeUp 1s ease 1.8s forwards;
+  }
+  .scroll-hint span {
+    font-size: 11px; letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+  }
+  .scroll-line {
+    width: 1px; height: 40px;
+    background: linear-gradient(to bottom, rgba(244,160,181,0.6), transparent);
+    animation: scrollPulse 2s ease infinite;
+  }
+
+  .sections { position: relative; z-index: 2; }
+
+  .section {
+    padding: 6rem 2rem;
+    max-width: 700px;
+    margin: 0 auto;
+    text-align: center;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .section-label {
+    font-size: 11px; letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #e8a0b0;
+    margin-bottom: 1.5rem;
+  }
+  .section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    color: #fff;
+    margin-bottom: 1.5rem;
+    line-height: 1.3;
+  }
+  .section h2 em { font-style: italic; color: #f4a0b5; }
+  .section p {
+    font-size: 16px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.9;
+    margin-bottom: 1rem;
+  }
+
+  .reasons-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+  .reason-card {
+    border: 1px solid rgba(255,255,255,0.08);
+    padding: 2rem 1.5rem;
+    transition: all 0.3s ease;
+    cursor: default;
+  }
+  .reason-card:hover {
+    border-color: rgba(244,160,181,0.3);
+    background: rgba(244,160,181,0.04);
+    transform: translateY(-4px);
+  }
+  .reason-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    font-style: italic;
+    color: rgba(244,160,181,0.3);
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  .reason-title {
+    font-size: 14px; font-weight: 400;
+    color: #fff;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.5px;
+  }
+  .reason-desc {
+    font-size: 13px; font-weight: 300;
+    color: rgba(255,255,255,0.4);
+    line-height: 1.7;
+  }
+
+  .memory-section {
+    background: rgba(244,160,181,0.04);
+    border-top: 1px solid rgba(244,160,181,0.1);
+    border-bottom: 1px solid rgba(244,160,181,0.1);
+  }
+  .quote-block {
+    position: relative;
+    padding: 2rem;
+    margin: 2rem 0;
+  }
+  .quote-mark {
+    font-family: 'Playfair Display', serif;
+    font-size: 6rem;
+    color: rgba(244,160,181,0.15);
+    position: absolute;
+    top: -1rem; left: 0;
+    line-height: 1;
+  }
+  .quote-text {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+    color: rgba(255,255,255,0.8);
+    line-height: 1.7;
+  }
+
+  .closing {
+    padding: 8rem 2rem;
+    text-align: center;
+    position: relative; z-index: 2;
+  }
+  .closing p {
+    font-size: 13px; letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.25);
+    margin-top: 3rem;
+  }
+
+  .heart-burst {
+    position: fixed; pointer-events: none; z-index: 999;
+    font-size: 20px;
+    animation: burst 1.2s ease forwards;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.4; } 50% { opacity: 1; }
+  }
+  @keyframes burst {
+    0% { opacity: 1; transform: translate(0,0) scale(1); }
+    100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.3); }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<section class="hero">
+  <div class="tagline">Welcome To My Website</div>
+  <h1>Im your Friend<br>I smile <em>every day</em></h1>
+  <p class="subtitle">HEY IM KUMAR !</p>
+  <button class="cta" onclick="scrollToReasons()">Discover Me ↓</button>
+  <div class="scroll-hint">
+    <span>scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<div class="sections">
+  <section class="section" id="reasons-anchor">
+    <div class="section-label">My Profile</div>
+    <h2>About Me</h2>
+    <p>Im 12th Student</p>
+
+    <div class="reasons-grid">
+      <div class="reason-card">
+        <span class="reason-num">01</span>
+        <div class="reason-title">Address</div>
+        <div class="reason-desc"> Indian GYM Pethmap Chiplun </div>
+      </div>
+      <div class="reason-card">
+        <span class="reason-num">02</span>
+        <div class="reason-title">Temporary Job</div>
+        <div class="reason-desc">Im Working This Job Due To My Family Problems, This Plaster Job Is Temporary</div> 
+      </div>
+      <div class="reason-card">
+        <span class="reason-num">03</span>
+        <div class="reason-title">My Dreams</div>
+        <div class="reason-desc">Become A Police Officer OR Start My Own Business</div>
+      </div>
+      <div class="reason-card">
+        <span class="reason-num">04</span>
+        <div class="reason-title">Instagra Id</div>
+        <div class="reason-desc">Instagram - @nothing_in_world0 </div>
+      </div>
+    </div>
+    <div class="reason-card">
+        <span class="reason-num">05</span>
+        <div class="reason-title">You Tube Id</div>
+        <div class="reason-desc">YouTube - <a href=https://youtube.com/@kumar_athod03?si=MjnWv7FXZxdLAZ2L target="_blank">You Tube</a> </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section memory-section">
+    <div class="section-label">Will You Be My Friend</div>
+    <h2>Read Cearfully And Alone Dont Tell Anyone</h2>
+    <div class="quote-block">
+      <span class="quote-mark">"</span>
+      <p class="section-label">You Have Any Quesions About Me OR Wante any my Details You Talk With Me in Social Media </p>
+    </div>
+    <p>Thank you for visting</p>
+  </section>
+
+  <section class="section">
+    <div class="section-label">About You</div>
+    <h2>Give Me Your Contact</h2>
+    <p>Like Social Media Instagram Snapchhat</p>
+    <p>Anything You Use Social Media</p>
+  </section>
+</div>
+
+<div class="closing">
+  <h1 style="font-family: 'Playfair Display', serif; font-size: clamp(2rem, 6vw, 4rem); color: #fff; font-style: italic;">Friend</h1>
+  <p>Made with Friend, just for you</p>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let W, H, particles = [];
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+function randRange(a, b) { return a + Math.random() * (b - a); }
+
+class Particle {
+  constructor() { this.reset(); }
+  reset() {
+    this.x = Math.random() * W;
+    this.y = H + 10;
+    this.size = randRange(1, 3);
+    this.speedY = randRange(0.3, 1.2);
+    this.speedX = randRange(-0.3, 0.3);
+    this.opacity = randRange(0.3, 0.8);
+    this.isHeart = Math.random() < 0.15;
+  }
+  update() {
+    this.y -= this.speedY;
+    this.x += this.speedX;
+    if (this.y < -10) this.reset();
+  }
+  draw() {
+    ctx.save();
+    ctx.globalAlpha = this.opacity;
+    if (this.isHeart) {
+      ctx.fillStyle = '#f4a0b5';
+      ctx.font = `${this.size * 5}px serif`;
+      ctx.fillText('♥', this.x, this.y);
+    } else {
+      ctx.fillStyle = `rgba(244, 160, 181, ${this.opacity})`;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+}
+
+for (let i = 0; i < 80; i++) {
+  const p = new Particle();
+  p.y = Math.random() * H;
+  particles.push(p);
+}
+
+function loop() {
+  ctx.clearRect(0, 0, W, H);
+  particles.forEach(p => { p.update(); p.draw(); });
+  requestAnimationFrame(loop);
+}
+loop();
+
+function scrollToReasons() {
+  document.getElementById('reasons-anchor').scrollIntoView({ behavior: 'smooth' });
+}
+
+document.addEventListener('click', function(e) {
+  for (let i = 0; i < 6; i++) {
+    const el = document.createElement('div');
+    el.className = 'heart-burst';
+    el.textContent = '♥';
+    el.style.left = e.clientX + 'px';
+    el.style.top = e.clientY + 'px';
+    const angle = (i / 6) * Math.PI * 2;
+    const dist = 60 + Math.random() * 40;
+    el.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
+    el.style.setProperty('--dy', Math.sin(angle) * dist + 'px');
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1200);
+  }
+});
+</script>
+
+</body>
+</html>
